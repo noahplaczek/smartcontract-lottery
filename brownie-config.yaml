@@ -10,10 +10,13 @@ compiler:
 dotenv: .env
 networks:
   default: development 
+  rinkeby:
   mainnet-fork:
     eth_usd_price_feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
   mainnet-fork-dev:
     eth_usd_price_feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
+wallets:
+  from_key: ${PRIVATE_KEY}
 
 # Metamask Accounts
 # 0xdf0B3E2218b3bfb128eaEc6142F84227fC00bbDE
