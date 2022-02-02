@@ -1,5 +1,5 @@
 from unicodedata import decimal
-from brownie import accounts, network, config, MockV3Aggregator
+from brownie import accounts, network, config, MockV3Aggregator, Contract
 from web3 import Web3
 
 FORKED_LOCAL_ENVIRONMENTS = ["mainnet-fork", "mainnet-fork-dev"]
@@ -9,6 +9,8 @@ DECIMALS = 8
 STARTING_PRICE = 200000000000
 
 # based on the type of environment, will pull in the appropriate accounts
+
+
 def get_account(index=None, id=None):
     if index:
         return accounts[index]
@@ -21,9 +23,11 @@ def get_account(index=None, id=None):
         return accounts[0]
     return accounts.add(config["wallets"]["from_key"])
 
+
 contract_to_mock = {
     "eth_usd_price_feed": MockV3Aggregator
 }
+
 
 def get_contract(contract_name):
     """This function will grab the contract addresses from the brownie config if defined. Otherwise, it will deploy a mock
@@ -41,11 +45,16 @@ def get_contract(contract_name):
             deploy_mocks()
         contract = contract_type[-1]
     else:
-        contract_address = config["networks"][network.show_active()][contract_name]
+        contract_address = config["networks"][network.show_active(
+        )][contract_name]
+        contract = Contract.from_abi(
+            contract_type._name, contract_address, contract_type.abi)
+    return contract
 
-def deploy_mocks(decimals=DECIMALS, starting_price = STARTING_PRICE):
+
+def deploy_mocks(decimals=DECIMALS, starting_price=STARTING_PRICE):
     account = get_account()
-    MockV3Aggregator.deploy(decimals, starting_price, {"from":account})
+    MockV3Aggregator.deploy(decimals, starting_price, {"from": account})
     print("Deployed Mocks")
 
 # DONT FORGET TO ADD IN YAML AND CREATE .env

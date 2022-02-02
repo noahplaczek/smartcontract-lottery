@@ -27,7 +27,6 @@ contract Lottery is VRFConsumerBase, Ownable {
     uint256 public fee;
     // keyhash is a way to uniquely identify the chainlink vrf node
     bytes32 public keyhash;
-    
 
     constructor(
         address _priceFeedAddress,
@@ -69,7 +68,7 @@ contract Lottery is VRFConsumerBase, Ownable {
         // change the state first so no other functions can be called while we are calculating a winner
         // no one can enter the lottery and no one can start a new lottery
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
-        // calling the below function from VRFConsumerBase. "returns (bytes32 requestId)" means that the contract is 
+        // calling the below function from VRFConsumerBase. "returns (bytes32 requestId)" means that the contract is
         // returning a bytes32 variable named requestId
         // function requestRandomness(bytes32 _keyHash, uint256 _fee) internal returns (bytes32 requestId)
         // this would be similar to writing out: bytes32 requestId = requestRandomness(keyhash, fee);
@@ -77,15 +76,21 @@ contract Lottery is VRFConsumerBase, Ownable {
         requestRandomness(keyhash, fee);
         // when chainlink returns the data, it does so in a second transaction by calling "fulfillRandomness"
     }
-    
+
     // the function is internal because we only want the VRFCoordinator to be able to call this function
     // overriding the original function of fulfillRandomness
-    function fulfillRandomness(bytes32 _requestId, uint256 _randomness) internal override {
-        require(lottery_state == LOTTERY_STATE.CALCULATING_WINNER, "You aren't there yet!");
+    function fulfillRandomness(bytes32 _requestId, uint256 _randomness)
+        internal
+        override
+    {
+        require(
+            lottery_state == LOTTERY_STATE.CALCULATING_WINNER,
+            "You aren't there yet!"
+        );
         require(_randomness > 0, "random-not-found");
         uint256 indexOfWinner = _randomness % players.length;
         recentWinner = players[indexOfWinner];
-        // transger the winner everything we have
+        // transfer the winner everything we have
         recentWinner.transfer(address(this).balance);
         players = new address payable[](0);
         lottery_state = LOTTERY_STATE.CLOSED;
